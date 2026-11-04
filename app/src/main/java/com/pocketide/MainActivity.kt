@@ -125,16 +125,13 @@ previewWebView = WebView(this).apply {
     val runButton = makeButton("Run") {
         runSelectedCode()
     }
-
     val clearButton = makeButton("Clear") {
     output.text = ""
-
-    editor.setText("")
-
     previewWebView.stopLoading()
     previewWebView.loadUrl("about:blank")
     previewWebView.visibility = View.GONE
 }
+    
 
     val infoButton = makeButton("Info") {
         output.text =
