@@ -112,23 +112,34 @@ previewWebView = WebView(this).apply {
     }
 
     fun makeButton(
-        label: String,
-        action: () -> Unit
-    ): Button {
-        return Button(this).apply {
-            text = label
-            textSize = 12f
-            setOnClickListener { action() }
+    label: String,
+    action: () -> Unit
+): Button {
+    return Button(this).apply {
+        text = label
+        textSize = 12f
+        isEnabled = true
+        isClickable = true
+
+        setOnClickListener {
+            Toast.makeText(
+                this@MainActivity,
+                "$label clicked",
+                Toast.LENGTH_SHORT
+            ).show()
+
+            action()
         }
     }
+}
 
     val runButton = makeButton("Run") {
-    output.text = "RUN BUTTON CLICKED"
+    runSelectedCode()
 }
 
 val clearButton = makeButton("Clear") {
     editor.setText("")
-    output.text = "CLEAR BUTTON CLICKED"
+    output.text = ""
     previewWebView.stopLoading()
     previewWebView.loadUrl("about:blank")
     previewWebView.visibility = View.GONE
