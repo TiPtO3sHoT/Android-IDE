@@ -126,8 +126,14 @@ previewWebView = WebView(this).apply {
     }
 
     val clearButton = makeButton("Clear") {
-        output.text = ""
-    }
+    output.text = "
+          previewWebView.stopLoading()
+          previewWebView.loadUrl("about:blank")
+          previewWebView.removeAllViews()
+          previewWebView.destroy()"
+    previewWebView.visibility = View.GONE
+    previewWebView.loadUrl("about:blank")
+}
 
     val infoButton = makeButton("Info") {
         output.text =
@@ -207,55 +213,146 @@ previewWebView = WebView(this).apply {
         )
     )
 
-    root.addView(outputTitle)
-    root.addView(output)
+   root.addView(outputTitle)
+
+root.addView(
+    output,
+    LinearLayout.LayoutParams(
+        ViewGroup.LayoutParams.MATCH_PARENT,
+        100
+    )
+)
+
+root.addView(
+    previewWebView,
+    LinearLayout.LayoutParams(
+        ViewGroup.LayoutParams.MATCH_PARENT,
+        220
+    )
+)
 
     setContentView(root)
     applyTheme(root, title)
 }
 
+private fun runSelectedCode() 
 private fun runSelectedCode() {
     val language = languagePicker.selectedItem.toString()
     val code = editor.text.toString()
 
     if (code.isBlank()) {
         output.text = "Nothing to run."
+        previewWebView.visibility = View.GONE
         return
     }
 
-    if (language != "JavaScript") {
-        output.text =
-            "$language execution is not available yet.\n" +
-            "JavaScript is our first execution engine."
-        return
-    }
+    output.text = ""
+    previewWebView.visibility = View.GONE
 
-    output.text = "Running JavaScript..."
+    when (language) {
+        "HTML" -> {
+            output.text = "HTML Preview"
+
+            previewWebView.visibility = View.VISIBLE
+            previewWebView.loadDataWithBaseURL(
+                "https://appassets.androidplatform.net/",
+                code,
+                "text/html",
+                "UTF-8",
+                null
+            )
+        }
+
+        "CSS" -> {
+            output.text = "CSS Preview"
+
+            val html = """
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta name="viewport"
+                          content="width=device-width,
+                          initial-scale=1.0">
+                    <style>
+                        body {
+                            font-family: sans-serif;
+                            padding: 16px;
+                        }
+                        $code
+                    </style>
+                </head>
+                <body>
+                    <h2>CSS Preview</h2>
+                    <p>Your CSS styles are applied here.</p>
+                    <button>Sample Button</button>
+                    <div class="box">Sample Box</div>
+                </body>
+                </html>
+            """.trimIndent()
+
+            previewWebView.visibility = View.VISIBLE
+            previewWebView.loadDataWithBaseURL(
+                "https://appassets.androidplatform.net/",
+                html,
+                "text/html",
+                "UTF-8",
+                null
+            )
+        }
+
+        "JavaScript" -> {
             if (!jsReady) {
-    output.text = "JavaScript engine is still starting. Try again shortly."
-    return
-}
-
-    val wrappedCode = """
-        (function() {
-            const originalLog = console.log;
-            console.log = function(...args) {
-                AndroidConsole.print(args.join(" "));
-            };
-
-            try {
-                $code
-            } catch (error) {
-                AndroidConsole.print("Error: " + error.message);
+                output.text =
+                    "JavaScript engine is starting. Try again."
+                return
             }
-        })();
-    """.trimIndent()
 
-    jsRuntime.evaluateJavascript(
-        wrappedCode,
-        null
-    )
+            output.text = "JavaScript Console\n"
+
+            val wrappedCode = """
+                (function() {
+                    console.log = function(...args) {
+                        AndroidConsole.print(
+                            args.join(" ")
+                        );
+                    };
+
+                    console.error = function(...args) {
+                        AndroidConsole.print(
+                            "Error: " + args.join(" ")
+                        );
+                    };
+
+                    console.warn = function(...args) {
+                        AndroidConsole.print(
+                            "Warning: " + args.join(" ")
+                        );
+                    };
+
+                    try {
+                        $code
+                    } catch (error) {
+                        AndroidConsole.print(
+                            "Error: " + error.message
+                        );
+                    }
+                })();
+            """.trimIndent()
+
+            jsRuntime.evaluateJavascript(
+                wrappedCode,
+                null
+            )
+        }
+
+        else -> {
+            output.text =
+                "$language execution is not available yet.\n" +
+                "HTML, CSS, and JavaScript are supported."
+        }
+    }
 }
+
     private fun saveProject() {
     val extension = when (languagePicker.selectedItem.toString()) {
         "Kotlin" -> "kt"
