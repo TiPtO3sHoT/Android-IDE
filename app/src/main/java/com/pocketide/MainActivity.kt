@@ -41,7 +41,12 @@ override fun onCreate(savedInstanceState: Bundle?) {
 
     jsRuntime = WebView(this)
     jsRuntime.settings.javaScriptEnabled = true
-
+previewWebView = WebView(this).apply {
+    settings.javaScriptEnabled = true
+    settings.domStorageEnabled = true
+    webViewClient = WebViewClient()
+    visibility = View.GONE
+}
     jsRuntime.addJavascriptInterface(
         object {
             @android.webkit.JavascriptInterface
