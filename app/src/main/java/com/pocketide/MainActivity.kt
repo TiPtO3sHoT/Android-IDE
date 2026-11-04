@@ -10,7 +10,10 @@ import android.view.ViewGroup
 import android.widget.*
 import io.github.rosemoe.sora.widget.CodeEditor
 import io.github.rosemoe.sora.widget.schemes.EditorColorScheme
-
+import android.webkit.WebView
+import android.webkit.WebViewClient
+import org.json.JSONTokener
+import org.json.JSONObject
 class MainActivity : Activity() {
 
     private lateinit var editor: CodeEditor
