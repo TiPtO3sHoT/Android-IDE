@@ -111,20 +111,29 @@ jsRuntime.loadUrl("about:blank")
         }
 
         fun makeButton(label: String, action: () -> Unit): Button {
-            return Button(this).apply {
-                text = label
-                textSize = 12f
-                setOnClickListener { action() }
-            }
-        }
-        val runButton = makeButton("Run") {
-    runSelectedCode()
+    return Button(this).apply {
+        text = label
+        textSize = 12f
+
+        setBackgroundTintList(
+            ColorStateList.valueOf(
+                if (darkTheme) Color.WHITE
+                else Color.DKGRAY
+            )
+        )
+
+        setTextColor(
+            if (darkTheme) Color.BLACK
+            else Color.WHITE
+        )
+
+        setOnClickListener { action() }
+    }
 }
 
-        val clearButton = makeButton("Clear") {
-            editor.setText("")
-            output.text = "Editor cleared."
-        }
+val runButton = makeButton("Run") {
+    runSelectedCode()
+}
 
         val infoButton = makeButton("Info") {
             output.text =
