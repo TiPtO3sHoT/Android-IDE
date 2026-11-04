@@ -1,6 +1,8 @@
 package com.pocketide
 
 import android.app.Activity
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.graphics.Color
 import android.graphics.Typeface
@@ -22,7 +24,8 @@ class MainActivity : Activity() {
 
     private var darkTheme = true
     private var editorSize = 16f
-
+private val SAVE_FILE_REQUEST = 1001
+private val OPEN_FILE_REQUEST = 1002
     private val languages = arrayOf(
         "Kotlin", "Java", "Python", "HTML",
         "CSS", "JavaScript", "C", "C++"
@@ -34,7 +37,32 @@ class MainActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+jsRuntime = WebView(this)
 
+jsRuntime.settings.javaScriptEnabled = true
+
+jsRuntime.addJavascriptInterface(
+    object {
+        @android.webkit.JavascriptInterface
+        fun print(message: String) {
+            runOnUiThread {
+                output.append("\n$message")
+            }
+        }
+    },
+    "AndroidConsole"
+)
+
+jsRuntime.webViewClient = object : WebViewClient() {
+    override fun onPageFinished(
+        view: WebView?,
+        url: String?
+    ) {
+        jsReady = true
+    }
+}
+
+jsRuntime.loadUrl("about:blank")
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(12, 12, 12, 12)
@@ -96,6 +124,13 @@ class MainActivity : Activity() {
                 "Pocket IDE\nEditor ready.\n" +
                 "Language: ${languagePicker.selectedItem}"
         }
+        val saveButton = makeButton("Save") {
+    saveProject()
+}
+
+        val openButton = makeButton("Open") {
+    openProject()
+}
 lateinit var themeButton: Button
 
 themeButton = makeButton("Light Mode") {
@@ -118,7 +153,8 @@ themeButton = makeButton("Light Mode") {
         buttons.addView(runButton)
         buttons.addView(clearButton)
         buttons.addView(infoButton)
-
+        buttons.addView(saveButton)
+        buttons.addView(openButton)
         settings.addView(themeButton)
         settings.addView(smallerButton)
         settings.addView(largerButton)
@@ -181,24 +217,10 @@ private fun runSelectedCode() {
     }
 
     output.text = "Running JavaScript..."
-
-    if (!::jsRuntime.isInitialized) {
-        jsRuntime = WebView(this)
-
-        jsRuntime.settings.javaScriptEnabled = true
-
-        jsRuntime.addJavascriptInterface(
-            object {
-                @android.webkit.JavascriptInterface
-                fun print(message: String) {
-                    runOnUiThread {
-                        output.append("\n$message")
-                    }
-                }
-            },
-            "AndroidConsole"
-        )
-    }
+            if (!jsReady) {
+    output.text = "JavaScript engine is still starting. Try again shortly."
+    return
+}
 
     val wrappedCode = """
         (function() {
@@ -220,10 +242,81 @@ private fun runSelectedCode() {
         null
     )
 }
-    private fun applyTheme(
+    private fun saveProject() {
+    val extension = when (languagePicker.selectedItem.toString()) {
+        "Kotlin" -> "kt"
+        "Java" -> "java"
+        "Python" -> "py"
+        "HTML" -> "html"
+        "CSS" -> "css"
+        "JavaScript" -> "js"
+        "C" -> "c"
+        "C++" -> "cpp"
+        else -> "txt"
+    }
+
+    val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+        addCategory(Intent.CATEGORY_OPENABLE)
+        type = "text/plain"
+        putExtra(
+            Intent.EXTRA_TITLE,
+            "untitled.$extension"
+        )
+    }
+
+    startActivityForResult(intent, SAVE_FILE_REQUEST)
+}
+
+private fun openProject() {
+    val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+        addCategory(Intent.CATEGORY_OPENABLE)
+        type = "*/*"
+    }
+
+    startActivityForResult(intent, OPEN_FILE_REQUEST)
+}
+
+override fun onActivityResult(
+    requestCode: Int,
+    resultCode: Int,
+    data: Intent?
+) {
+    super.onActivityResult(requestCode, resultCode, data)
+
+    if (resultCode != RESULT_OK || data?.data == null) {
+        return
+    }
+
+    val uri = data.data!!
+
+    try {
+        when (requestCode) {
+            SAVE_FILE_REQUEST -> {
+                contentResolver.openOutputStream(uri)?.use { stream ->
+                    stream.write(
+                        editor.text.toString().toByteArray(Charsets.UTF_8)
+                    )
+                }
+
+                output.text = "Project saved successfully!"
+            }
+
+            OPEN_FILE_REQUEST -> {
+                contentResolver.openInputStream(uri)?.bufferedReader(Charsets.UTF_8)?.use { reader ->
+                    editor.setText(reader.readText())
+                }
+
+                output.text = "Project opened successfully!"
+            }
+        }
+    } catch (e: Exception) {
+        output.text = "File error: ${e.message}"
+    }
+}
+            private fun applyTheme(
         root: LinearLayout,
         title: TextView
-    ) {
+    )  {
         val background: Int
         val foreground: Int
         val editorBackground: Int
@@ -311,7 +404,12 @@ private fun runSelectedCode() {
     }
 
     override fun onDestroy() {
-        editor.release()
-        super.onDestroy()
-    }
+    editor.release()
+
+    jsRuntime.stopLoading()
+    jsRuntime.loadUrl("about:blank")
+    jsRuntime.removeAllViews()
+    jsRuntime.destroy()
+
+    super.onDestroy()
 }
