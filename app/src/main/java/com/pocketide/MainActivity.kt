@@ -321,7 +321,9 @@ override fun onActivityResult(
         val foreground: Int
         val editorBackground: Int
         val editorForeground: Int
-
+languagePicker.setTextColor(foreground)
+languagePicker.backgroundTintList =
+    ColorStateList.valueOf(foreground)
         if (darkTheme) {
             background = Color.rgb(30, 32, 40)
             foreground = Color.WHITE
