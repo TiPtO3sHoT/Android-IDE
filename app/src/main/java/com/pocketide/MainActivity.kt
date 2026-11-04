@@ -1,5 +1,5 @@
 package com.pocketide
-
+import android.view.View
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
@@ -33,6 +33,7 @@ private val OPEN_FILE_REQUEST = 1002
     private lateinit var jsRuntime: WebView
     private var jsReady = false
     private val darkBackground = Color.rgb(30, 32, 40)
+    private lateinit var previewWebView: WebView
     private val lightBackground = Color.rgb(245, 246, 250)
 
     
@@ -235,8 +236,12 @@ root.addView(
     applyTheme(root, title)
 }
 
-private fun runSelectedCode() 
-private fun runSelectedCode() {
+private fun runSelectedCode(previewWebView = WebView(this).apply {
+    settings.javaScriptEnabled = true
+    settings.domStorageEnabled = true
+    webViewClient = WebViewClient()
+    visibility = View.GONE
+}){
     val language = languagePicker.selectedItem.toString()
     val code = editor.text.toString()
 
@@ -252,8 +257,8 @@ private fun runSelectedCode() {
     when (language) {
         "HTML" -> {
             output.text = "HTML Preview"
-
             previewWebView.visibility = View.VISIBLE
+
             previewWebView.loadDataWithBaseURL(
                 "https://appassets.androidplatform.net/",
                 code,
@@ -271,8 +276,7 @@ private fun runSelectedCode() {
                 <html>
                 <head>
                     <meta name="viewport"
-                          content="width=device-width,
-                          initial-scale=1.0">
+                          content="width=device-width, initial-scale=1">
                     <style>
                         body {
                             font-family: sans-serif;
@@ -312,29 +316,21 @@ private fun runSelectedCode() {
             val wrappedCode = """
                 (function() {
                     console.log = function(...args) {
-                        AndroidConsole.print(
-                            args.join(" ")
-                        );
+                        AndroidConsole.print(args.join(" "));
                     };
 
                     console.error = function(...args) {
-                        AndroidConsole.print(
-                            "Error: " + args.join(" ")
-                        );
+                        AndroidConsole.print("Error: " + args.join(" "));
                     };
 
                     console.warn = function(...args) {
-                        AndroidConsole.print(
-                            "Warning: " + args.join(" ")
-                        );
+                        AndroidConsole.print("Warning: " + args.join(" "));
                     };
 
                     try {
                         $code
                     } catch (error) {
-                        AndroidConsole.print(
-                            "Error: " + error.message
-                        );
+                        AndroidConsole.print("Error: " + error.message);
                     }
                 })();
             """.trimIndent()
@@ -352,6 +348,7 @@ private fun runSelectedCode() {
         }
     }
 }
+
 
     private fun saveProject() {
     val extension = when (languagePicker.selectedItem.toString()) {
