@@ -245,6 +245,8 @@ root.addView(
 setContentView(root)
 applyTheme(root, title)
 
+}
+
 private fun runSelectedCode() {
     val language = languagePicker.selectedItem.toString()
     val code = editor.text.toString()
