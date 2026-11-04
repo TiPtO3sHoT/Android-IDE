@@ -1,38 +1,61 @@
-
 package com.pocketide
 
 import android.app.Activity
 import android.os.Bundle
 import android.graphics.Color
+import android.graphics.Typeface
 import android.view.Gravity
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.EditText
-import android.widget.LinearLayout
-import android.widget.ScrollView
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
+import io.github.rosemoe.sora.widget.CodeEditor
 
 class MainActivity : Activity() {
 
-    private lateinit var codeEditor: EditText
-    private lateinit var outputView: TextView
+    private lateinit var editor: CodeEditor
+    private lateinit var output: TextView
+    private lateinit var languagePicker: Spinner
+
+    private val languages = arrayOf(
+        "Kotlin",
+        "Java",
+        "Python",
+        "HTML",
+        "CSS",
+        "JavaScript",
+        "C",
+        "C++"
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
+            setPadding(12, 12, 12, 12)
             setBackgroundColor(Color.rgb(24, 24, 32))
-            setPadding(16, 16, 16, 16)
         }
 
         val title = TextView(this).apply {
             text = "Pocket IDE"
-            textSize = 24f
-            setTextColor(Color.WHITE)
+            textSize = 25f
             gravity = Gravity.CENTER
-            setPadding(0, 8, 0, 16)
+            setTextColor(Color.WHITE)
+            setPadding(0, 12, 0, 12)
+        }
+
+        languagePicker = Spinner(this).apply {
+            adapter = ArrayAdapter(
+                this@MainActivity,
+                android.R.layout.simple_spinner_dropdown_item,
+                languages
+            )
+        }
+
+        editor = CodeEditor(this).apply {
+            setText("// Welcome to Pocket IDE!\n// Select a language and start coding.\n")
+            typefaceText = Typeface.MONOSPACE
+            textSize = 16f
+            setLineNumberEnabled(true)
         }
 
         val buttons = LinearLayout(this).apply {
@@ -43,44 +66,44 @@ class MainActivity : Activity() {
         val runButton = Button(this).apply {
             text = "Run"
             setOnClickListener {
-                outputView.text =
-                    "Pocket IDE is ready!\n\n" +
-                    "Code execution will be added in a later stage."
+                output.text =
+                    "Code saved in editor.\n" +
+                    "Selected language: ${languagePicker.selectedItem}\n\n" +
+                    "Execution engines will be added in a later stage."
             }
         }
 
         val clearButton = Button(this).apply {
             text = "Clear"
             setOnClickListener {
-                codeEditor.setText("")
-                outputView.text = "Output cleared."
+                editor.setText("")
+                output.text = "Editor cleared."
+            }
+        }
+
+        val saveButton = Button(this).apply {
+            text = "Info"
+            setOnClickListener {
+                output.text =
+                    "Pocket IDE\n" +
+                    "Editor ready.\n" +
+                    "Language: ${languagePicker.selectedItem}"
             }
         }
 
         buttons.addView(runButton)
         buttons.addView(clearButton)
-
-        codeEditor = EditText(this).apply {
-            hint = "Write your code here..."
-            setTextColor(Color.WHITE)
-            setHintTextColor(Color.LTGRAY)
-            setBackgroundColor(Color.rgb(35, 35, 45))
-            gravity = Gravity.TOP or Gravity.START
-            textSize = 14f
-            typeface = android.graphics.Typeface.MONOSPACE
-            setPadding(12, 12, 12, 12)
-            minLines = 10
-        }
+        buttons.addView(saveButton)
 
         val outputTitle = TextView(this).apply {
-            text = "Output"
-            textSize = 18f
+            text = "Console Output"
+            textSize = 17f
             setTextColor(Color.WHITE)
             setPadding(0, 12, 0, 8)
         }
 
-        outputView = TextView(this).apply {
-            text = "Welcome to Pocket IDE!"
+        output = TextView(this).apply {
+            text = "Pocket IDE ready!"
             textSize = 14f
             setTextColor(Color.GREEN)
             setBackgroundColor(Color.BLACK)
@@ -88,16 +111,19 @@ class MainActivity : Activity() {
         }
 
         root.addView(title)
+
         root.addView(
-            buttons,
+            languagePicker,
             LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
             )
         )
 
+        root.addView(buttons)
+
         root.addView(
-            codeEditor,
+            editor,
             LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 0,
@@ -106,14 +132,13 @@ class MainActivity : Activity() {
         )
 
         root.addView(outputTitle)
-        root.addView(
-            outputView,
-            LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-            )
-        )
+        root.addView(output)
 
         setContentView(root)
+    }
+
+    override fun onDestroy() {
+        editor.release()
+        super.onDestroy()
     }
 }
