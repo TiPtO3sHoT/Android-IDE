@@ -27,7 +27,8 @@ class MainActivity : Activity() {
         "Kotlin", "Java", "Python", "HTML",
         "CSS", "JavaScript", "C", "C++"
     )
-
+private lateinit var jsRuntime: WebView
+private var jsReady = false
     private val darkBackground = Color.rgb(30, 32, 40)
     private val lightBackground = Color.rgb(245, 246, 250)
 
