@@ -76,18 +76,25 @@ jsRuntime.loadUrl("about:blank")
         }
 
         languagePicker = Spinner(this).apply {
-            adapter = ArrayAdapter(
-                this@MainActivity,
-                android.R.layout.simple_spinner_dropdown_item,
-                languages
-            )
-        }
+    adapter = ArrayAdapter(
+        this@MainActivity,
+        android.R.layout.simple_spinner_item,
+        languages
+    ).apply {
+        setDropDownViewResource(
+            android.R.layout.simple_spinner_dropdown_item
+        )
+    }
 
-        editor = CodeEditor(this).apply {
-            setText(
-                "// Welcome to Pocket IDE!\n" +
-                "// Select a language and start coding.\n"
-            )
+    setBackgroundTintList(
+        ColorStateList.valueOf(
+            if (darkTheme) Color.WHITE
+            else Color.BLACK
+        )
+    )
+}
+                
+
             typefaceText = Typeface.MONOSPACE
             textSizePx = editorSize
             setLineNumberEnabled(true)
