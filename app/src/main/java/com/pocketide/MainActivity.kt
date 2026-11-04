@@ -247,7 +247,7 @@ root.addView(
     previewWebView,
     LinearLayout.LayoutParams(
         ViewGroup.LayoutParams.MATCH_PARENT,
-        400
+        180
     )
 )
 
