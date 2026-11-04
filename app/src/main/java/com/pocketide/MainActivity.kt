@@ -82,13 +82,9 @@ private var jsReady = false
                 setOnClickListener { action() }
             }
         }
-
-        val runButton = makeButton("Run") {
-            output.text =
-                "Code saved in editor.\n" +
-                "Selected language: ${languagePicker.selectedItem}\n\n" +
-                "Execution engines will be added in a later stage."
-        }
+val runButton = makeButton("Run") {
+    runSelectedCode()
+}
 
         val clearButton = makeButton("Clear") {
             editor.setText("")
