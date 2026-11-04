@@ -72,44 +72,44 @@ previewWebView = WebView(this).apply {
     jsRuntime.loadUrl("about:blank")
 
     val root = LinearLayout(this).apply {
-        orientation = LinearLayout.VERTICAL
-        setPadding(12, 12, 12, 12)
-    }
+    orientation = LinearLayout.VERTICAL
+    setPadding(6, 4, 6, 4)
+}
 
-    val title = TextView(this).apply {
-        text = "Pocket IDE"
-        textSize = 25f
-        gravity = Gravity.CENTER
-        setPadding(0, 12, 0, 12)
-    }
+val title = TextView(this).apply {
+    text = "Pocket IDE"
+    textSize = 20f
+    gravity = Gravity.CENTER
+    setPadding(0, 4, 0, 4)
+}
 
-    languagePicker = Spinner(this).apply {
-        adapter = ArrayAdapter(
-            this@MainActivity,
-            android.R.layout.simple_spinner_item,
-            languages
-        ).apply {
-            setDropDownViewResource(
-                android.R.layout.simple_spinner_dropdown_item
-            )
-        }
+languagePicker = Spinner(this).apply {
+    adapter = ArrayAdapter(
+        this@MainActivity,
+        android.R.layout.simple_spinner_item,
+        languages
+    ).apply {
+        setDropDownViewResource(
+            android.R.layout.simple_spinner_dropdown_item
+        )
     }
+}
 
-    editor = CodeEditor(this).apply {
-        typefaceText = Typeface.MONOSPACE
-        textSizePx = editorSize
-        setLineNumberEnabled(true)
-    }
+editor = CodeEditor(this).apply {
+    typefaceText = Typeface.MONOSPACE
+    textSizePx = editorSize
+    setLineNumberEnabled(true)
+}
 
-    val buttons = LinearLayout(this).apply {
-        orientation = LinearLayout.HORIZONTAL
-        gravity = Gravity.CENTER
-    }
+val buttons = LinearLayout(this).apply {
+    orientation = LinearLayout.HORIZONTAL
+    gravity = Gravity.CENTER
+}
 
-    val settings = LinearLayout(this).apply {
-        orientation = LinearLayout.HORIZONTAL
-        gravity = Gravity.CENTER
-    }
+val settings = LinearLayout(this).apply {
+    orientation = LinearLayout.HORIZONTAL
+    gravity = Gravity.CENTER
+}
 
     fun makeButton(
     label: String,
@@ -191,10 +191,17 @@ val clearButton = makeButton("Clear") {
     settings.addView(largerButton)
 
     val outputTitle = TextView(this).apply {
-        text = "Console Output"
-        textSize = 17f
-        setPadding(0, 12, 0, 8)
-    }
+    text = "Status: Ready"
+    textSize = 12f
+    setPadding(6, 4, 6, 4)
+}
+val resultsButton = makeButton("View Results") {
+    val intent = Intent(
+        this@MainActivity,
+        ResultsActivity::class.java
+    )
+    startActivity(intent)
+}
 previewWebView.webChromeClient = object : android.webkit.WebChromeClient() {
     override fun onConsoleMessage(
         consoleMessage: android.webkit.ConsoleMessage
@@ -233,28 +240,90 @@ previewWebView.webChromeClient = object : android.webkit.WebChromeClient() {
         )
     )
 
-   root.addView(outputTitle)
+   // MAIN EDITOR PAGE
+val editorPage = LinearLayout(this).apply {
+    orientation = LinearLayout.VERTICAL
+}
 
-root.addView(
+editorPage.addView(title)
+
+editorPage.addView(
+    languagePicker,
+    LinearLayout.LayoutParams(
+        ViewGroup.LayoutParams.MATCH_PARENT,
+        42
+    )
+)
+
+editorPage.addView(buttons)
+editorPage.addView(settings)
+
+editorPage.addView(
+    editor,
+    LinearLayout.LayoutParams(
+        ViewGroup.LayoutParams.MATCH_PARENT,
+        0,
+        1f
+    )
+)
+resultsPage = LinearLayout(this).apply {
+val resultsButton = makeButton("View Results") {
+    editorPage.visibility = View.GONE
+    resultsPage.visibility = View.VISIBLE
+}
+
+editorPage.addView(resultsButton)
+
+// RESULTS PAGE
+val resultsPage = LinearLayout(this).apply {
+    orientation = LinearLayout.VERTICAL
+    visibility = View.GONE
+}
+
+val backButton = makeButton("Back to Editor") {
+    resultsPage.visibility = View.GONE
+    editorPage.visibility = View.VISIBLE
+}
+
+resultsPage.addView(backButton)
+resultsPage.addView(outputTitle)
+
+resultsPage.addView(
     output,
     LinearLayout.LayoutParams(
         ViewGroup.LayoutParams.MATCH_PARENT,
-        60
+        0,
+        1f
+    )
+)
+
+resultsPage.addView(
+    previewWebView,
+    LinearLayout.LayoutParams(
+        ViewGroup.LayoutParams.MATCH_PARENT,
+        0,
+        2f
     )
 )
 
 root.addView(
-    previewWebView,
+    editorPage,
     LinearLayout.LayoutParams(
         ViewGroup.LayoutParams.MATCH_PARENT,
-        180
+        ViewGroup.LayoutParams.MATCH_PARENT
+    )
+)
+
+root.addView(
+    resultsPage,
+    LinearLayout.LayoutParams(
+        ViewGroup.LayoutParams.MATCH_PARENT,
+        ViewGroup.LayoutParams.MATCH_PARENT
     )
 )
 
 setContentView(root)
 applyTheme(root, title)
-
-}
 
 private fun runSelectedCode() {
     val language = languagePicker.selectedItem.toString()
