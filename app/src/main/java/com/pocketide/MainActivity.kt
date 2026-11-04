@@ -4,10 +4,12 @@ import android.app.Activity
 import android.os.Bundle
 import android.graphics.Color
 import android.graphics.Typeface
+import android.content.res.ColorStateList
 import android.view.Gravity
 import android.view.ViewGroup
 import android.widget.*
 import io.github.rosemoe.sora.widget.CodeEditor
+import io.github.rosemoe.sora.widget.schemes.EditorColorScheme
 
 class MainActivity : Activity() {
 
@@ -15,16 +17,16 @@ class MainActivity : Activity() {
     private lateinit var output: TextView
     private lateinit var languagePicker: Spinner
 
+    private var darkTheme = true
+    private var editorSize = 16f
+
     private val languages = arrayOf(
-        "Kotlin",
-        "Java",
-        "Python",
-        "HTML",
-        "CSS",
-        "JavaScript",
-        "C",
-        "C++"
+        "Kotlin", "Java", "Python", "HTML",
+        "CSS", "JavaScript", "C", "C++"
     )
+
+    private val darkBackground = Color.rgb(30, 32, 40)
+    private val lightBackground = Color.rgb(245, 246, 250)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,14 +34,12 @@ class MainActivity : Activity() {
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(12, 12, 12, 12)
-            setBackgroundColor(Color.rgb(24, 24, 32))
         }
 
         val title = TextView(this).apply {
             text = "Pocket IDE"
             textSize = 25f
             gravity = Gravity.CENTER
-            setTextColor(Color.WHITE)
             setPadding(0, 12, 0, 12)
         }
 
@@ -52,9 +52,12 @@ class MainActivity : Activity() {
         }
 
         editor = CodeEditor(this).apply {
-            setText("// Welcome to Pocket IDE!\n// Select a language and start coding.\n")
+            setText(
+                "// Welcome to Pocket IDE!\n" +
+                "// Select a language and start coding.\n"
+            )
             typefaceText = Typeface.MONOSPACE
-            textSizePx = 16f
+            textSizePx = editorSize
             setLineNumberEnabled(true)
         }
 
@@ -63,50 +66,71 @@ class MainActivity : Activity() {
             gravity = Gravity.CENTER
         }
 
-        val runButton = Button(this).apply {
-            text = "Run"
-            setOnClickListener {
-                output.text =
-                    "Code saved in editor.\n" +
-                    "Selected language: ${languagePicker.selectedItem}\n\n" +
-                    "Execution engines will be added in a later stage."
+        val settings = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER
+        }
+
+        fun makeButton(label: String, action: () -> Unit): Button {
+            return Button(this).apply {
+                text = label
+                textSize = 12f
+                setOnClickListener { action() }
             }
         }
 
-        val clearButton = Button(this).apply {
-            text = "Clear"
-            setOnClickListener {
-                editor.setText("")
-                output.text = "Editor cleared."
-            }
+        val runButton = makeButton("Run") {
+            output.text =
+                "Code saved in editor.\n" +
+                "Selected language: ${languagePicker.selectedItem}\n\n" +
+                "Execution engines will be added in a later stage."
         }
 
-        val saveButton = Button(this).apply {
-            text = "Info"
-            setOnClickListener {
-                output.text =
-                    "Pocket IDE\n" +
-                    "Editor ready.\n" +
-                    "Language: ${languagePicker.selectedItem}"
-            }
+        val clearButton = makeButton("Clear") {
+            editor.setText("")
+            output.text = "Editor cleared."
+        }
+
+        val infoButton = makeButton("Info") {
+            output.text =
+                "Pocket IDE\nEditor ready.\n" +
+                "Language: ${languagePicker.selectedItem}"
+        }
+
+        val themeButton = makeButton("Light Mode") {
+            darkTheme = !darkTheme
+            applyTheme(root, title)
+            (it as Button).text =
+                if (darkTheme) "Light Mode" else "Dark Mode"
+        }
+
+        val smallerButton = makeButton("A-") {
+            editorSize = (editorSize - 1f).coerceAtLeast(10f)
+            editor.textSizePx = editorSize
+        }
+
+        val largerButton = makeButton("A+") {
+            editorSize = (editorSize + 1f).coerceAtMost(32f)
+            editor.textSizePx = editorSize
         }
 
         buttons.addView(runButton)
         buttons.addView(clearButton)
-        buttons.addView(saveButton)
+        buttons.addView(infoButton)
+
+        settings.addView(themeButton)
+        settings.addView(smallerButton)
+        settings.addView(largerButton)
 
         val outputTitle = TextView(this).apply {
             text = "Console Output"
             textSize = 17f
-            setTextColor(Color.WHITE)
             setPadding(0, 12, 0, 8)
         }
 
         output = TextView(this).apply {
             text = "Pocket IDE ready!"
             textSize = 14f
-            setTextColor(Color.GREEN)
-            setBackgroundColor(Color.BLACK)
             setPadding(12, 12, 12, 12)
         }
 
@@ -121,6 +145,7 @@ class MainActivity : Activity() {
         )
 
         root.addView(buttons)
+        root.addView(settings)
 
         root.addView(
             editor,
@@ -135,6 +160,98 @@ class MainActivity : Activity() {
         root.addView(output)
 
         setContentView(root)
+
+        applyTheme(root, title)
+    }
+
+    private fun applyTheme(
+        root: LinearLayout,
+        title: TextView
+    ) {
+        val background: Int
+        val foreground: Int
+        val editorBackground: Int
+        val editorForeground: Int
+
+        if (darkTheme) {
+            background = Color.rgb(30, 32, 40)
+            foreground = Color.WHITE
+            editorBackground = Color.rgb(25, 27, 35)
+            editorForeground = Color.rgb(230, 230, 240)
+        } else {
+            background = Color.rgb(245, 246, 250)
+            foreground = Color.rgb(30, 30, 35)
+            editorBackground = Color.WHITE
+            editorForeground = Color.rgb(35, 35, 45)
+        }
+
+        root.setBackgroundColor(background)
+        title.setTextColor(foreground)
+        output.setTextColor(
+            if (darkTheme) Color.rgb(120, 255, 160)
+            else Color.rgb(20, 110, 55)
+        )
+
+        output.setBackgroundColor(
+            if (darkTheme) Color.BLACK else Color.rgb(225, 230, 235)
+        )
+
+        output.setTextColor(
+            if (darkTheme) Color.rgb(120, 255, 160)
+            else Color.rgb(20, 110, 55)
+        )
+
+        val scheme = editor.colorScheme
+
+        scheme.setColor(
+            EditorColorScheme.WHOLE_BACKGROUND,
+            editorBackground
+        )
+
+        scheme.setColor(
+            EditorColorScheme.TEXT_NORMAL,
+            editorForeground
+        )
+
+        scheme.setColor(
+            EditorColorScheme.LINE_NUMBER,
+            Color.rgb(130, 140, 155)
+        )
+
+        scheme.setColor(
+            EditorColorScheme.LINE_NUMBER_BACKGROUND,
+            editorBackground
+        )
+
+        scheme.setColor(
+            EditorColorScheme.CURRENT_LINE,
+            if (darkTheme) Color.rgb(45, 48, 60)
+            else Color.rgb(235, 240, 250)
+        )
+
+        scheme.setColor(
+            EditorColorScheme.KEYWORD,
+            if (darkTheme) Color.rgb(120, 160, 255)
+            else Color.rgb(30, 75, 190)
+        )
+
+        scheme.setColor(
+            EditorColorScheme.LITERAL,
+            if (darkTheme) Color.rgb(180, 220, 140)
+            else Color.rgb(30, 130, 65)
+        )
+
+        scheme.setColor(
+            EditorColorScheme.COMMENT,
+            if (darkTheme) Color.rgb(130, 145, 155)
+            else Color.rgb(110, 120, 130)
+        )
+
+        scheme.setColor(
+            EditorColorScheme.OPERATOR,
+            if (darkTheme) Color.rgb(255, 190, 120)
+            else Color.rgb(170, 85, 20)
+        )
     }
 
     override fun onDestroy() {
