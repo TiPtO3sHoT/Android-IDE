@@ -195,7 +195,16 @@ val clearButton = makeButton("Clear") {
         textSize = 17f
         setPadding(0, 12, 0, 8)
     }
-
+previewWebView.webChromeClient = object : android.webkit.WebChromeClient() {
+    override fun onConsoleMessage(
+        consoleMessage: android.webkit.ConsoleMessage
+    ): Boolean {
+        runOnUiThread {
+            output.append("\n" + consoleMessage.message())
+        }
+        return true
+    }
+}
     output = TextView(this).apply {
         text = "Pocket IDE ready!"
         textSize = 14f
