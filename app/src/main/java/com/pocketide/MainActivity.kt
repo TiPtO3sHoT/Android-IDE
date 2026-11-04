@@ -226,16 +226,24 @@ val clearButton = makeButton("Clear") {
 
    root.addView(outputTitle)
 
-   root.addView(
+root.addView(
+    output,
+    LinearLayout.LayoutParams(
+        ViewGroup.LayoutParams.MATCH_PARENT,
+        60
+    )
+)
+
+root.addView(
     previewWebView,
     LinearLayout.LayoutParams(
         ViewGroup.LayoutParams.MATCH_PARENT,
         240
     )
 )
-   setContentView(root)
-    applyTheme(root, title)
-}
+
+setContentView(root)
+applyTheme(root, title)
 
 private fun runSelectedCode() {
     val language = languagePicker.selectedItem.toString()
