@@ -127,11 +127,7 @@ previewWebView = WebView(this).apply {
     }
 
     val clearButton = makeButton("Clear") {
-    output.text = "
-          previewWebView.stopLoading()
-          previewWebView.loadUrl("about:blank")
-          previewWebView.removeAllViews()
-          previewWebView.destroy()"
+    output.text = ""
     previewWebView.visibility = View.GONE
     previewWebView.loadUrl("about:blank")
 }
@@ -236,12 +232,7 @@ root.addView(
     applyTheme(root, title)
 }
 
-private fun runSelectedCode(previewWebView = WebView(this).apply {
-    settings.javaScriptEnabled = true
-    settings.domStorageEnabled = true
-    webViewClient = WebViewClient()
-    visibility = View.GONE
-}){
+private fun runSelectedCode() {
     val language = languagePicker.selectedItem.toString()
     val code = editor.text.toString()
 
@@ -544,6 +535,11 @@ private fun applyTheme(
     jsRuntime.loadUrl("about:blank")
     jsRuntime.removeAllViews()
     jsRuntime.destroy()
+
+    previewWebView.stopLoading()
+    previewWebView.loadUrl("about:blank")
+    previewWebView.removeAllViews()
+    previewWebView.destroy()
 
     super.onDestroy()
 }
