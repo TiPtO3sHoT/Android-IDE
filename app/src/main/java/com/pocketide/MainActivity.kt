@@ -96,13 +96,14 @@ class MainActivity : Activity() {
                 "Pocket IDE\nEditor ready.\n" +
                 "Language: ${languagePicker.selectedItem}"
         }
+lateinit var themeButton: Button
 
-        val themeButton = makeButton("Light Mode") {
-            darkTheme = !darkTheme
-            applyTheme(root, title)
-            (it as Button).text =
-                if (darkTheme) "Light Mode" else "Dark Mode"
-        }
+themeButton = makeButton("Light Mode") {
+    darkTheme = !darkTheme
+    applyTheme(root, title)
+    themeButton.text =
+        if (darkTheme) "Light Mode" else "Dark Mode"
+}
 
         val smallerButton = makeButton("A-") {
             editorSize = (editorSize - 1f).coerceAtLeast(10f)
