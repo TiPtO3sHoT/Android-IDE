@@ -230,10 +230,16 @@ root.addView(
     previewWebView,
     LinearLayout.LayoutParams(
         ViewGroup.LayoutParams.MATCH_PARENT,
-        (240 * resources.displayMetrics.density).toInt()
+        220
     )
 )
-   
+   root.addView(
+    previewWebView,
+    LinearLayout.LayoutParams(
+        ViewGroup.LayoutParams.MATCH_PARENT,
+        220
+    )
+)
    setContentView(root)
     applyTheme(root, title)
 }
