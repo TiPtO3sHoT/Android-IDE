@@ -76,12 +76,118 @@ previewWebView = WebView(this).apply {
     setPadding(6, 4, 6, 4)
 }
 
-val title = TextView(this).apply {
-    text = "Pocket IDE"
-    textSize = 20f
-    gravity = Gravity.CENTER
-    setPadding(0, 4, 0, 4)
+
+val outputTitle = TextView(this).apply {
+    text = "Console Output"
+    textSize = 16f
+    setPadding(6, 6, 6, 6)
 }
+
+output = TextView(this).apply {
+    text = "Pocket IDE ready!"
+    textSize = 14f
+    setPadding(12, 12, 12, 12)
+}
+
+previewWebView.webChromeClient =
+    object : android.webkit.WebChromeClient() {
+        override fun onConsoleMessage(
+            consoleMessage: android.webkit.ConsoleMessage
+        ): Boolean {
+            runOnUiThread {
+                output.append("\n" + consoleMessage.message())
+            }
+            return true
+        }
+    }
+
+// EDITOR PAGE
+val editorPage = LinearLayout(this).apply {
+    orientation = LinearLayout.VERTICAL
+}
+
+editorPage.addView(title)
+
+editorPage.addView(
+    languagePicker,
+    LinearLayout.LayoutParams(
+        ViewGroup.LayoutParams.MATCH_PARENT,
+        42
+    )
+)
+
+editorPage.addView(buttons)
+editorPage.addView(settings)
+
+editorPage.addView(
+    editor,
+    LinearLayout.LayoutParams(
+        ViewGroup.LayoutParams.MATCH_PARENT,
+        0,
+        1f
+    )
+)
+
+// RESULTS PAGE
+val resultsPage = LinearLayout(this).apply {
+    orientation = LinearLayout.VERTICAL
+    visibility = View.GONE
+}
+
+val resultsButton = makeButton("View Results") {
+    editorPage.visibility = View.GONE
+    resultsPage.visibility = View.VISIBLE
+}
+
+editorPage.addView(resultsButton)
+
+val backButton = makeButton("Back to Editor") {
+    resultsPage.visibility = View.GONE
+    editorPage.visibility = View.VISIBLE
+}
+
+resultsPage.addView(backButton)
+resultsPage.addView(outputTitle)
+
+resultsPage.addView(
+    output,
+    LinearLayout.LayoutParams(
+        ViewGroup.LayoutParams.MATCH_PARENT,
+        0,
+        1f
+    )
+)
+
+resultsPage.addView(
+    previewWebView,
+    LinearLayout.LayoutParams(
+        ViewGroup.LayoutParams.MATCH_PARENT,
+        0,
+        2f
+    )
+)
+
+root.addView(
+    editorPage,
+    LinearLayout.LayoutParams(
+        ViewGroup.LayoutParams.MATCH_PARENT,
+        ViewGroup.LayoutParams.MATCH_PARENT
+    )
+)
+
+root.addView(
+    resultsPage,
+    LinearLayout.LayoutParams(
+        ViewGroup.LayoutParams.MATCH_PARENT,
+        ViewGroup.LayoutParams.MATCH_PARENT
+    )
+)
+
+setContentView(root)
+applyTheme(root, title)
+
+}
+
 
 languagePicker = Spinner(this).apply {
     adapter = ArrayAdapter(
