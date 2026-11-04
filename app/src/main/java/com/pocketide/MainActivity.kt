@@ -164,7 +164,62 @@ themeButton = makeButton("Light Mode") {
 
         applyTheme(root, title)
     }
+private fun runSelectedCode() {
+    val language = languagePicker.selectedItem.toString()
+    val code = editor.text.toString()
 
+    if (code.isBlank()) {
+        output.text = "Nothing to run."
+        return
+    }
+
+    if (language != "JavaScript") {
+        output.text =
+            "$language execution is not available yet.\n" +
+            "JavaScript is our first execution engine."
+        return
+    }
+
+    output.text = "Running JavaScript..."
+
+    if (!::jsRuntime.isInitialized) {
+        jsRuntime = WebView(this)
+
+        jsRuntime.settings.javaScriptEnabled = true
+
+        jsRuntime.addJavascriptInterface(
+            object {
+                @android.webkit.JavascriptInterface
+                fun print(message: String) {
+                    runOnUiThread {
+                        output.append("\n$message")
+                    }
+                }
+            },
+            "AndroidConsole"
+        )
+    }
+
+    val wrappedCode = """
+        (function() {
+            const originalLog = console.log;
+            console.log = function(...args) {
+                AndroidConsole.print(args.join(" "));
+            };
+
+            try {
+                $code
+            } catch (error) {
+                AndroidConsole.print("Error: " + error.message);
+            }
+        })();
+    """.trimIndent()
+
+    jsRuntime.evaluateJavascript(
+        wrappedCode,
+        null
+    )
+}
     private fun applyTheme(
         root: LinearLayout,
         title: TextView
