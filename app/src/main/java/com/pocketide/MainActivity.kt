@@ -337,9 +337,7 @@ override fun onActivityResult(
         val foreground: Int
         val editorBackground: Int
         val editorForeground: Int
-languagePicker.setTextColor(foreground)
-languagePicker.backgroundTintList =
-    ColorStateList.valueOf(foreground)
+
         if (darkTheme) {
             background = Color.rgb(30, 32, 40)
             foreground = Color.WHITE
@@ -351,75 +349,34 @@ languagePicker.backgroundTintList =
             editorBackground = Color.WHITE
             editorForeground = Color.rgb(35, 35, 45)
         }
-
+        languagePicker.setBackgroundTintList(ColorStateList.valueOf(foreground)
+        )
         root.setBackgroundColor(background)
         title.setTextColor(foreground)
         output.setTextColor(
-            if (darkTheme) Color.rgb(120, 255, 160)
-            else Color.rgb(20, 110, 55)
-        )
+        val buttonColor = if (darkTheme) {
+    Color.WHITE
+} else {
+    Color.DKGRAY
+}
 
-        output.setBackgroundColor(
-            if (darkTheme) Color.BLACK else Color.rgb(225, 230, 235)
-        )
+val buttonTextColor = if (darkTheme) {
+    Color.BLACK
+} else {
+    Color.WHITE
+}
 
-        output.setTextColor(
-            if (darkTheme) Color.rgb(120, 255, 160)
-            else Color.rgb(20, 110, 55)
-        )
-
-        val scheme = editor.colorScheme
-
-        scheme.setColor(
-            EditorColorScheme.WHOLE_BACKGROUND,
-            editorBackground
-        )
-
-        scheme.setColor(
-            EditorColorScheme.TEXT_NORMAL,
-            editorForeground
-        )
-
-        scheme.setColor(
-            EditorColorScheme.LINE_NUMBER,
-            Color.rgb(130, 140, 155)
-        )
-
-        scheme.setColor(
-            EditorColorScheme.LINE_NUMBER_BACKGROUND,
-            editorBackground
-        )
-
-        scheme.setColor(
-            EditorColorScheme.CURRENT_LINE,
-            if (darkTheme) Color.rgb(45, 48, 60)
-            else Color.rgb(235, 240, 250)
-        )
-
-        scheme.setColor(
-            EditorColorScheme.KEYWORD,
-            if (darkTheme) Color.rgb(120, 160, 255)
-            else Color.rgb(30, 75, 190)
-        )
-
-        scheme.setColor(
-            EditorColorScheme.LITERAL,
-            if (darkTheme) Color.rgb(180, 220, 140)
-            else Color.rgb(30, 130, 65)
-        )
-
-        scheme.setColor(
-            EditorColorScheme.COMMENT,
-            if (darkTheme) Color.rgb(130, 145, 155)
-            else Color.rgb(110, 120, 130)
-        )
-
-        scheme.setColor(
-            EditorColorScheme.OPERATOR,
-            if (darkTheme) Color.rgb(255, 190, 120)
-            else Color.rgb(170, 85, 20)
-        )
-    }
+for (button in listOf(
+    runButton,
+    infoButton,
+    saveButton,
+    openButton
+)) {
+    button.setBackgroundTintList(
+        ColorStateList.valueOf(buttonColor)
+    )
+    button.setTextColor(buttonTextColor)
+}
 
     override fun onDestroy() {
     editor.release()
