@@ -54,7 +54,7 @@ class MainActivity : Activity() {
         editor = CodeEditor(this).apply {
             setText("// Welcome to Pocket IDE!\n// Select a language and start coding.\n")
             typefaceText = Typeface.MONOSPACE
-            textSize = 16f
+            textSizePx = 16f
             setLineNumberEnabled(true)
         }
 
