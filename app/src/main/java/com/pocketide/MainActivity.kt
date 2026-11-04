@@ -226,18 +226,11 @@ val clearButton = makeButton("Clear") {
 
    root.addView(outputTitle)
 
-root.addView(
-    previewWebView,
-    LinearLayout.LayoutParams(
-        ViewGroup.LayoutParams.MATCH_PARENT,
-        220
-    )
-)
    root.addView(
     previewWebView,
     LinearLayout.LayoutParams(
         ViewGroup.LayoutParams.MATCH_PARENT,
-        220
+        240
     )
 )
    setContentView(root)
